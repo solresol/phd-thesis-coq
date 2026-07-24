@@ -307,7 +307,7 @@ Lemma coefficient_dot_dense_clause
       clause).
 Proof.
   intros Hbounded.
-  unfold dense_clause_coefficients.
+  rewrite dense_clause_coefficients_map_seq.
   rewrite coefficient_dot_map_seq.
   induction clause as [|[sign variable] clause IH].
   - change
@@ -384,7 +384,12 @@ Lemma clause_target_value clause :
   signed_integer_value (clause_target clause) =
   Z.of_nat
     (length (filter (fun literal => negb (fst literal)) clause)).
-Proof. reflexivity. Qed.
+Proof.
+  unfold clause_target.
+  cbn [signed_integer_value].
+  rewrite negative_literal_count_filter_length.
+  reflexivity.
+Qed.
 
 Lemma clause_residual_is_negative_satisfied_count
     (num_variables : nat) (clause : list (bool * nat))
@@ -525,7 +530,7 @@ Lemma coefficient_dot_unit
   boolean_value (point variable).
 Proof.
   intros Hbound.
-  unfold unit_coefficients.
+  rewrite unit_coefficients_map_seq.
   rewrite coefficient_dot_map_seq.
   transitivity
     (integer_sum
@@ -622,7 +627,7 @@ Lemma all_pinning_observations_loss
       (all_pinning_observations num_variables weight)) =
   (Z.of_nat weight * Z.of_nat num_variables)%Z.
 Proof.
-  unfold all_pinning_observations.
+  rewrite all_pinning_observations_flat_map_seq.
   rewrite pinning_loss_over_variables.
   - rewrite seq_length. reflexivity.
   - intros variable Hin.

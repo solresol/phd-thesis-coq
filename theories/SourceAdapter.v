@@ -8,14 +8,26 @@ Definition literal_variable (l : bool * nat) : nat := snd l.
 Definition max_literal_variable (l : bool * nat) : nat :=
   literal_variable l.
 
-Definition max_clause_variable (clause : list (bool * nat)) : nat :=
-  fold_right Nat.max 0 (map max_literal_variable clause).
+Fixpoint max_clause_variable (clause : list (bool * nat)) : nat :=
+  match clause with
+  | [] => 0
+  | literal :: rest =>
+      Nat.max (max_literal_variable literal) (max_clause_variable rest)
+  end.
 
-Definition max_cnf_variable (formula : list (list (bool * nat))) : nat :=
-  fold_right Nat.max 0 (map max_clause_variable formula).
+Fixpoint max_cnf_variable (formula : list (list (bool * nat))) : nat :=
+  match formula with
+  | [] => 0
+  | clause :: rest =>
+      Nat.max (max_clause_variable clause) (max_cnf_variable rest)
+  end.
 
-Definition cnf_has_variables (formula : list (list (bool * nat))) : bool :=
-  existsb (fun clause => negb (Nat.eqb (length clause) 0)) formula.
+Fixpoint cnf_has_variables (formula : list (list (bool * nat))) : bool :=
+  match formula with
+  | [] => false
+  | clause :: rest =>
+      negb (Nat.eqb (length clause) 0) || cnf_has_variables rest
+  end.
 
 Definition source_num_variables (formula : list (list (bool * nat))) : nat :=
   if cnf_has_variables formula then S (max_cnf_variable formula) else 0.
@@ -24,7 +36,7 @@ Lemma max_clause_variable_bounds clause sign variable :
   In (sign, variable) clause ->
   variable <= max_clause_variable clause.
 Proof.
-  unfold max_clause_variable, max_literal_variable, literal_variable.
+  unfold max_literal_variable, literal_variable.
   induction clause as [|[s v] clause IH]; cbn.
   - contradiction.
   - intros [Heq | Hin].
@@ -39,7 +51,6 @@ Lemma max_cnf_variable_bounds formula clause sign variable :
   In (sign, variable) clause ->
   variable <= max_cnf_variable formula.
 Proof.
-  unfold max_cnf_variable.
   induction formula as [|head tail IH]; cbn.
   - contradiction.
   - intros [Heq | Hin] Hliteral.
@@ -59,18 +70,26 @@ Lemma source_variable_lt_num_variables formula clause sign variable :
   variable < source_num_variables formula.
 Proof.
   intros Hclause Hliteral.
-  unfold source_num_variables, cnf_has_variables.
+  unfold source_num_variables.
   assert (Hexists :
-      existsb (fun clause0 : list (bool * nat) =>
-        negb (Nat.eqb (length clause0) 0)) formula = true).
+      cnf_has_variables formula = true).
   {
-    apply existsb_exists.
-    exists clause. split; [exact Hclause|].
-    apply Bool.negb_true_iff.
-    apply Nat.eqb_neq.
-    intro Hzero.
-    apply length_zero_iff_nil in Hzero.
-    subst clause. contradiction.
+    induction formula as [|head tail IH]; cbn in *.
+    - contradiction.
+    - destruct Hclause as [Heq | Hin].
+      + subst head.
+        apply Bool.orb_true_iff.
+        left.
+        apply Bool.negb_true_iff.
+        apply Nat.eqb_neq.
+        intro Hzero.
+        apply length_zero_iff_nil in Hzero.
+        subst clause.
+        contradiction.
+      + apply Bool.orb_true_iff.
+        right.
+        apply IH.
+        exact Hin.
   }
   rewrite Hexists.
   apply Nat.lt_succ_r.

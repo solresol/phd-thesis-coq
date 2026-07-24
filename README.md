@@ -10,14 +10,14 @@ authoritative source for the mathematical claims and exposition.
 
 ## Target theorem
 
-The final development should prove, in the complexity framework of the Coq
-Library of Complexity Theory, that:
+The development proves, in the complexity framework of the Coq Library of
+Complexity Theory, that:
 
 > the language of finite signed affine regression instances at `p = 5` whose
 > objective attains a supplied threshold is NP-hard under polynomial-time
 > many-one reductions.
 
-The planned reduction starts with exact 3-SAT. For a formula with `n`
+The verified reduction starts with exact 3-SAT. For a formula with `n`
 variables and `m` clauses, it constructs:
 
 - two positive Boolean-pinning observations per variable;
@@ -32,18 +32,20 @@ The essential correctness statement is:
 F is satisfiable  <->  compile(F) attains its threshold.
 ```
 
-The final NP-hardness declaration must compose this equivalence and a checked
+The final NP-hardness declaration composes this equivalence and a checked
 polynomial-time implementation of `compile` with the upstream theorem
 `CookLevin0 : NPcomplete (kSAT 3)`.
 
 ## Current status
 
-The repository begins with a build-level connection to the upstream 3-SAT
-theorem. The project-specific target language, compiler, p-adic correctness
-proof, polynomial-time implementation, and final hardness composition remain
-to be formalised. See [THEOREM_STATUS.md](THEOREM_STATUS.md) for the exact
-ledger and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the intended proof
-layers.
+The headline theorem
+`Hardness.fixed_prime_signed_regression_is_NP_hard` is machine-checked. The
+development includes the concrete target language and `5`-adic semantics,
+the compiler's two-way semantic correctness theorem, cubic runtime and
+encoded-output-size bounds, the upstream `polyTimeComputable` value, and the
+composition with `CookLevin0`. See
+[THEOREM_STATUS.md](THEOREM_STATUS.md) for the exact ledger and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the proof layers.
 
 No result is counted as complete merely because its Lean analogue exists.
 Coq and Lean check separate proof terms.
@@ -97,8 +99,8 @@ opam install . --deps-only
 make
 ```
 
-The initial build checks that the pinned upstream theorem can be imported
-under the name and type on which this project depends.
+The build checks the complete development, including the pinned upstream
+theorem and the final project-specific hardness composition.
 
 ## Proof policy
 

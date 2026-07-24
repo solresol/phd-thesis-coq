@@ -360,7 +360,7 @@ Lemma five_adic_coefficient_dot_dense_clause
       clause).
 Proof.
 intros Hbounded.
-unfold dense_clause_coefficients.
+rewrite dense_clause_coefficients_map_seq.
 rewrite five_adic_coefficient_dot_map_seq.
 induction clause as [|[sign variable] clause IH].
 - transitivity
@@ -449,7 +449,12 @@ Definition embedded_boolean_point
 Lemma clause_target_five_adic clause :
   signed_integer_to_five_adic (clause_target clause) =
   (length (filter (fun literal => negb (fst literal)) clause))%:R.
-Proof. reflexivity. Qed.
+Proof.
+unfold clause_target.
+cbn [signed_integer_to_five_adic].
+rewrite negative_literal_count_filter_length.
+reflexivity.
+Qed.
 
 Lemma five_adic_minus_one_add_sub (a b : five_adic) :
   -1 + (a - b) = a - (b + 1).
@@ -538,6 +543,7 @@ rewrite
     (embedded_boolean_point point)
     Hbounded).
 rewrite five_adic_literal_sum_on_boolean.
+rewrite negative_literal_count_filter_length.
 exact: five_adic_sub_self_left.
 Qed.
 
@@ -601,7 +607,7 @@ Lemma five_adic_coefficient_dot_unit
   point variable.
 Proof.
 intros Hbound.
-unfold unit_coefficients.
+rewrite unit_coefficients_map_seq.
 rewrite five_adic_coefficient_dot_map_seq.
 transitivity
   (five_adic_sum
@@ -824,7 +830,7 @@ Lemma all_pinning_observations_five_adic_loss_on_boolean
       (all_pinning_observations num_variables weight)) =
   (weight%:R : rat) * num_variables%:R.
 Proof.
-unfold all_pinning_observations.
+rewrite all_pinning_observations_flat_map_seq.
 rewrite pinning_five_adic_loss_over_variables_on_boolean.
 - by rewrite List.seq_length.
 - intros variable Hin.
@@ -1296,7 +1302,8 @@ Lemma all_pinning_observations_five_adic_loss
       (all_pinning_observations num_variables weight)) =
   pinning_objective num_variables weight point.
 Proof.
-unfold all_pinning_observations, pinning_objective.
+rewrite all_pinning_observations_flat_map_seq.
+unfold pinning_objective.
 apply pinning_observations_loss_over_variables.
 intros variable Hin.
 apply List.in_seq in Hin.
@@ -1810,14 +1817,19 @@ Lemma variable_occurrence_count_le_maximum
     (variable_occurrence_count variable formula)
     (maximum_occurrence num_variables formula).
 Proof.
-intros Hbound.
-unfold maximum_occurrence.
-apply
-  (fold_right_max_map_ge
-    (fun index => variable_occurrence_count index formula)
-    (value := variable)).
-apply List.in_seq.
-lia.
+revert variable.
+induction num_variables as [|num_variables IH].
+- intros variable Hbound.
+  lia.
+- intros variable Hbound.
+  cbn [maximum_occurrence].
+  destruct (Nat.eq_dec variable num_variables) as [Heq | Hneq].
+  + subst variable.
+    apply Nat.le_max_l.
+  + eapply Nat.le_trans.
+    * apply IH.
+      lia.
+    * apply Nat.le_max_r.
 Qed.
 
 Lemma variable_occurrence_count_lt_pin_weight

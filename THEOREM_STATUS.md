@@ -12,9 +12,9 @@ composition.
 | Concrete `5`-adic acceptance semantics | Complete | `FiveAdic.v` constructs `Q5` as the fraction field of the inverse-limit `5`-adic integers supplied by the pinned `fpseries` development. Its norm laws, including multiplicativity, are proved from that concrete model rather than postulated. |
 | Boolean pinning and clause indicator | Complete | `BooleanSemantics.v` proves the pin-pair constant, repeated-literal clause residual identity, clause indicator, and exact Boolean loss formula. `RegressionSemantics.v` proves the arbitrary-point pinning lower bound and coordinate-rounding inequality. |
 | Compiler semantic correctness | Complete | `compile_five_adic_correct` proves `kSAT 3 formula <-> FixedPrimeSignedRegression (compile formula)`, including reconstruction of a finite SAT assignment from an arbitrary accepting `5`-adic point and the total compiler's invalid-input branch. |
-| Compiler output-size bound | Pending | The target encoding length is bounded by a polynomial in the encoded source length. |
-| Compiler polynomial-time implementation | Pending | The executable compiler is proved polynomial-time in the upstream Coq complexity model. |
-| Signed fixed-prime regression is NP-hard | Pending | The compiler reduction is composed with `CookLevin0`, and `Print Assumptions` reveals no project-defined axioms or admitted facts. |
+| Compiler output-size bound | Complete | `CompilerComplexity.compile_timed_size_bound` gives a cubic bound for the registered target encoding, including signed integers, coefficient vectors, observations, and the complete instance. |
+| Compiler polynomial-time implementation | Complete | `CompilerComplexity.compile_timed_polytime` supplies the upstream `polyTimeComputable` record from extracted recurrences, a cubic compiler bound, the upstream `kCNF_decb` bound, and the cubic result-size bound. |
+| Signed fixed-prime regression is NP-hard | Complete | `Hardness.fixed_prime_signed_regression_is_NP_hard` composes the verified compiler reduction with the hardness component of `CookLevin0`. `Print Assumptions` reports no project-defined axiom or admitted fact. |
 
 ## Headline target
 
@@ -85,6 +85,33 @@ MathComp's standard classical support
 constructive indefinite description). It reports no project-defined axiom or
 admitted result.
 
-This milestone is still not the NP-hardness theorem: the compiler's encoded
-output-size and polynomial-time bounds, the `reducesPolyMO` value, and the
-composition with `CookLevin0` remain.
+At this milestone, the compiler's encoded output-size and polynomial-time
+bounds, the `reducesPolyMO` value, and the composition with `CookLevin0`
+still remained.
+
+## Polynomial-time hardness milestone
+
+The final project-specific increment adds:
+
+- exact extracted recurrences for every compiler helper used by the
+  executable reduction;
+- a cubic running-time bound for valid exact-3-CNF inputs, combined with the
+  pinned upstream polynomial bound for the `kCNF 3` decision procedure;
+- a cubic encoded-output-size bound derived from the actual registered
+  encodings of signed integers, observations, lists, products, and complete
+  regression instances;
+- the upstream `polyTimeComputable` value
+  `CompilerComplexity.compile_timed_polytime`;
+- the many-one reduction
+  `Hardness.exact_three_sat_reduces_to_fixed_prime_signed_regression`; and
+- the headline theorem
+  `Hardness.fixed_prime_signed_regression_is_NP_hard`.
+
+The complete project builds with Coq 8.16.1. `Print Assumptions` reports that
+the compiler time, size, and polynomial-time theorems are closed under the
+global context. The final reduction and NP-hardness theorem inherit only
+MathComp's standard classical support already present in the concrete
+five-adic semantic theorem:
+`propositional_extensionality`, dependent functional extensionality, and
+constructive indefinite description. They depend on no project-defined
+axiom or admitted fact.

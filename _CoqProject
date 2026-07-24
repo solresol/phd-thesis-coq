@@ -8,7 +8,9 @@ theories/SignedInt.v
 theories/TargetSyntax.v
 theories/SourceAdapter.v
 theories/CompilerSyntax.v
+theories/CompilerComplexity.v
 theories/BooleanSemantics.v
 theories/PadicFoundation.v
 theories/FiveAdic.v
 theories/RegressionSemantics.v
+theories/Hardness.v
