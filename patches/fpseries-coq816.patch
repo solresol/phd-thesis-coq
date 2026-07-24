@@ -1,0 +1,85 @@
+diff --git a/theories/invlim.v b/theories/invlim.v
+index f3f3656..ceb4b2e 100644
+--- a/theories/invlim.v
++++ b/theories/invlim.v
+@@ -1028,38 +1028,39 @@ Variable Sys : invsys bonding.
+ Variable TLim : ringInvLimType Sys.
+ Implicit Type x y : TLim.
+ 
+-Definition ilunit x := `[forall i, 'pi_i x \is a unit].
++Definition ilunit x := `[< forall i, 'pi_i x \is a GRing.unit >].
+ 
+ Fact inv_isunitP x :
+-  (forall i, 'pi_i x \is a unit) -> isthread Sys (fun i => ('pi_i x)^-1).
++  (forall i, 'pi_i x \is a GRing.unit) ->
++  isthread Sys (fun i => ('pi_i x)^-1).
+ Proof.
+ by move=> Hunit i j ilej; rewrite /= rmorphV ?(ilprojE x) // Hunit.
+ Qed.
+ Definition ilinv x : TLim :=
+-  if pselect (forall i, 'pi_i x \is a unit) is left Pf
++  if pselect (forall i, 'pi_i x \is a GRing.unit) is left Pf
+   then ilthr (inv_isunitP Pf) else x.
+ 
+ 
+ Fact ilmulVr : {in ilunit, left_inverse 1 ilinv *%R}.
+ Proof.
+-move=> x /forallbP Hinv; apply invlimE=> i.
++move=> x /asboolP Hinv; apply invlimE=> i.
+ rewrite /ilinv; case: pselect => /= [H |/(_ Hinv)//].
+ by rewrite rmorphM rmorph1 /= !ilthrP mulVr.
+ Qed.
+ Fact ilmulrV : {in ilunit, right_inverse 1 ilinv *%R}.
+ Proof.
+-move=> x /forallbP Hinv; apply invlimE=> i.
++move=> x /asboolP Hinv; apply invlimE=> i.
+ rewrite /ilinv; case: pselect => /= [H |/(_ Hinv)//].
+ by rewrite rmorphM rmorph1 /= !ilthrP mulrV.
+ Qed.
+ Fact ilunit_impl x y : y * x = 1 /\ x * y = 1 -> ilunit x.
+ Proof.
+-move=> [Hxy Hyx]; apply/forallbP => i; apply/unitrP.
++move=> [Hxy Hyx]; apply/asboolP => i; apply/unitrP.
+ by exists ('pi_i y); rewrite -!rmorphM Hxy Hyx /= rmorph1.
+ Qed.
+ Fact ilinv0id : {in [predC ilunit], ilinv =1 id}.
+ Proof.
+-move=> x; rewrite inE /= => /forallbP Hx.
++move=> x; rewrite inE /= => /asboolP Hx.
+ by rewrite /ilinv; case: pselect => /= [/= H|//]; have:= Hx H.
+ Qed.
+ Definition invlim_unitRingMixin of (phant TLim) :=
+@@ -1068,8 +1069,9 @@ Local Canonical TLim_unitRingType :=
+   Eval hnf in UnitRingType TLim (invlim_unitRingMixin (Phant TLim)).
+ 
+ Lemma ilunitP x :
+-  reflect (forall i, 'pi_i x \is a unit) (x \is a unit).
+-Proof. exact: forallbP. Qed.
++  reflect (forall i, 'pi_i x \is a GRing.unit)
++    (x \is a GRing.unit).
++Proof. exact: asboolP. Qed.
+ 
+ End InvLimitUnitRing.
+ End InvLimitUnitRing.
+@@ -1290,7 +1292,7 @@ Fact invlim_fieldMixin of phant TLim :
+   Field.mixin_of [unitRingType of TLim].
+ Proof.
+ move=> x /il_neq0 [i Hi].
+-apply/forallbP => j; rewrite unitfE.
++apply/asboolP => j; rewrite unitfE.
+ have [k ilek jlek] := directedP i j.
+ have {Hi} : 'pi_k x != 0.
+   move: Hi; apply contra => /eqP/(congr1 (bonding ilek)).
+diff --git a/theories/padic.v b/theories/padic.v
+index 176eb42..8d6982f 100644
+--- a/theories/padic.v
++++ b/theories/padic.v
+@@ -149,7 +149,7 @@ Implicit Type x y : padic_int p_pr.
+ 
+ Lemma padic_unit x : (x \is a GRing.unit) = ('pi_0%N x != 0).
+ Proof.
+-apply/forallbP/idP => [/(_ 0%N) | /= Hx i].
++apply/asboolP/idP => [/(_ 0%N) | /= Hx i].
+ - by apply/memPn: ('pi_0%N x); rewrite unitr0.
+ - have:= leq0n i; rewrite -leEnat => Hi.
+   move: (ilprojE x Hi) Hx; rewrite {Hi} /padic_bond /Zmn => <-.

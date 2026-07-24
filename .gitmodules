@@ -1,0 +1,3 @@
+[submodule "vendor/fpseries"]
+	path = vendor/fpseries
+	url = https://github.com/hivert/fpseries.git

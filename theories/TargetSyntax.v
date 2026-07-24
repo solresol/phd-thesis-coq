@@ -52,6 +52,27 @@ Proof.
   apply (registerAs affine_observation_representation).
 Defined.
 
+#[global] Instance term_affine_observation_representation :
+  computableTime' affine_observation_representation
+    (fun _ _ => (1, tt)).
+Proof.
+  apply cast_computableTime.
+Qed.
+
+#[global] Instance term_build_affine_observation :
+  computableTime' Build_affine_observation
+    (fun _ _ =>
+      (1, fun _ _ =>
+        (1, fun _ _ =>
+          (1, fun _ _ => (100, tt))))).
+Proof.
+  computable_casted_result.
+  unfold affine_observation_representation.
+  cbn.
+  extract.
+  solverec.
+Qed.
+
 Definition signed_regression_instance_representation
     (instance : signed_regression_instance) :=
   (instance_num_variables instance,
@@ -62,3 +83,23 @@ Definition signed_regression_instance_representation
 Proof.
   apply (registerAs signed_regression_instance_representation).
 Defined.
+
+#[global] Instance term_signed_regression_instance_representation :
+  computableTime' signed_regression_instance_representation
+    (fun _ _ => (1, tt)).
+Proof.
+  apply cast_computableTime.
+Qed.
+
+#[global] Instance term_build_signed_regression_instance :
+  computableTime' Build_signed_regression_instance
+    (fun _ _ =>
+      (1, fun _ _ =>
+        (1, fun _ _ => (100, tt)))).
+Proof.
+  computable_casted_result.
+  unfold signed_regression_instance_representation.
+  cbn.
+  extract.
+  solverec.
+Qed.

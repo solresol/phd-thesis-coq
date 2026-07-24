@@ -1,4 +1,5 @@
 -Q theories PhdThesisCoq
+-R _build/fpseries/theories Combi
 
 -arg -w -arg -notation-overridden
 
@@ -8,3 +9,6 @@ theories/TargetSyntax.v
 theories/SourceAdapter.v
 theories/CompilerSyntax.v
 theories/BooleanSemantics.v
+theories/PadicFoundation.v
+theories/FiveAdic.v
+theories/RegressionSemantics.v

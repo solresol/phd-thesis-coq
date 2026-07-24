@@ -9,3 +9,4 @@ Makefile.coq.conf
 .lia.cache
 .nia.cache
 _opam/
+_build/

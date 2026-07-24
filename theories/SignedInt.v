@@ -1,5 +1,5 @@
 From Coq Require Import ZArith Lia.
-From Undecidability.L.Tactics Require Import GenEncode.
+From Undecidability.L.Tactics Require Import GenEncode LTactics.
 From Undecidability.L.Datatypes Require Import LNat.
 
 (**
@@ -130,3 +130,17 @@ Qed.
 
 MetaCoq Run (tmGenEncode "signed_integer_enc" signed_integer).
 #[export] Hint Resolve signed_integer_enc_correct : Lrewrite.
+
+#[export] Instance term_nonnegative :
+  computableTime' Nonnegative (fun _ _ => (1, tt)).
+Proof.
+  extract constructor.
+  solverec.
+Qed.
+
+#[export] Instance term_negative :
+  computableTime' Negative (fun _ _ => (1, tt)).
+Proof.
+  extract constructor.
+  solverec.
+Qed.

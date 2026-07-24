@@ -7,11 +7,11 @@ composition.
 | Result | Status | Completion criterion |
 |---|---|---|
 | Upstream exact 3-SAT is NP-complete | Complete, imported | `Project.upstream_three_sat_is_np_complete` type-checks against the pinned theorem `CookLevin0`. |
-| Source-language adapter | In progress | `SourceAdapter.v` now uses upstream `kCNF 3` directly, proves variable bounds, and decomposes exact three-literal clauses without normalising repetitions. The remaining reduction theorem must connect the total compiler's rejection branch to `kCNF_decb 3`. |
-| Concrete signed-regression instance encoding | In progress | `SignedInt.v` and `TargetSyntax.v` provide finite MetaCoq encodings for canonical signed integers, observations, and instances. The syntax is not complete until its acceptance predicate is connected to the concrete `5`-adic model. |
-| Concrete `5`-adic acceptance semantics | Pending | Acceptance is defined over an actual `5`-adic field, with the required norm facts proved rather than postulated. |
-| Boolean pinning and clause indicator | In progress | `BooleanSemantics.v` proves the pin-pair constant, repeated-literal clause residual identity, clause indicator, and exact Boolean loss formula. The arbitrary-`5`-adic pinning theorem remains. |
-| Compiler semantic correctness | In progress | `compile_valid_boolean_correct` proves correctness for Boolean points and upstream SAT assignments. The converse from an arbitrary accepting `5`-adic point, plus the invalid-input branch of `compile`, remains. |
+| Source-language adapter | Complete | `SourceAdapter.v` uses upstream `kCNF 3` directly, proves variable bounds, and decomposes exact three-literal clauses without normalising repetitions. `compile_five_adic_correct` also proves that the total compiler's rejection branch rejects every non-`kCNF 3` input. |
+| Concrete signed-regression instance encoding | Complete | `SignedInt.v` and `TargetSyntax.v` provide finite MetaCoq encodings for canonical signed integers, observations, and instances, together with constructor computability instances used by the reduction. |
+| Concrete `5`-adic acceptance semantics | Complete | `FiveAdic.v` constructs `Q5` as the fraction field of the inverse-limit `5`-adic integers supplied by the pinned `fpseries` development. Its norm laws, including multiplicativity, are proved from that concrete model rather than postulated. |
+| Boolean pinning and clause indicator | Complete | `BooleanSemantics.v` proves the pin-pair constant, repeated-literal clause residual identity, clause indicator, and exact Boolean loss formula. `RegressionSemantics.v` proves the arbitrary-point pinning lower bound and coordinate-rounding inequality. |
+| Compiler semantic correctness | Complete | `compile_five_adic_correct` proves `kSAT 3 formula <-> FixedPrimeSignedRegression (compile formula)`, including reconstruction of a finite SAT assignment from an arbitrary accepting `5`-adic point and the total compiler's invalid-input branch. |
 | Compiler output-size bound | Pending | The target encoding length is bounded by a polynomial in the encoded source length. |
 | Compiler polynomial-time implementation | Pending | The executable compiler is proved polynomial-time in the upstream Coq complexity model. |
 | Signed fixed-prime regression is NP-hard | Pending | The compiler reduction is composed with `CookLevin0`, and `Print Assumptions` reveals no project-defined axioms or admitted facts. |
@@ -63,3 +63,28 @@ The full project builds with Coq 8.16.1. `Print Assumptions` reports
 This milestone is not the NP-hardness theorem: it does not yet supply a
 concrete `5`-adic field, arbitrary-point soundness, an encoded-size bound,
 or a polynomial-time reduction proof.
+
+## Concrete five-adic semantic milestone
+
+The second project-specific increment adds:
+
+- a pinned snapshot of `fpseries`, patched only for Coq 8.16 and MathComp
+  compatibility and built in a repository-local namespace;
+- a proof of multiplicativity for the inverse-limit `5`-adic valuation;
+- the concrete field `Q5`, its norm, and the norm laws used by the reduction;
+- an exact interpretation of the signed target encoding over `Q5`;
+- a coordinate-rounding proof showing that every accepting arbitrary
+  `5`-adic point yields an accepting Boolean point; and
+- the semantic equivalence theorem
+  `RegressionSemantics.compile_five_adic_correct`.
+
+The full project builds with Coq 8.16.1. `Print Assumptions` for
+`compile_valid_five_adic_sound` and `compile_five_adic_correct` reports only
+MathComp's standard classical support
+(`propositional_extensionality`, dependent functional extensionality, and
+constructive indefinite description). It reports no project-defined axiom or
+admitted result.
+
+This milestone is still not the NP-hardness theorem: the compiler's encoded
+output-size and polynomial-time bounds, the `reducesPolyMO` value, and the
+composition with `CookLevin0` remain.
