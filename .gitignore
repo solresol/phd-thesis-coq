@@ -7,4 +7,5 @@ Makefile.coq.conf
 *.vos
 *.vok
 .lia.cache
+.nia.cache
 _opam/

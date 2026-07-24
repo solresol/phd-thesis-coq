@@ -3,3 +3,8 @@
 -arg -w -arg -notation-overridden
 
 theories/Project.v
+theories/SignedInt.v
+theories/TargetSyntax.v
+theories/SourceAdapter.v
+theories/CompilerSyntax.v
+theories/BooleanSemantics.v
