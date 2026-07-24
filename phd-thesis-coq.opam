@@ -1,0 +1,20 @@
+opam-version: "2.0"
+version: "dev"
+synopsis: "Coq proof of fixed-prime p-adic regression NP-hardness"
+description: """
+Formalises the exact-3-SAT reduction establishing NP-hardness of the signed
+affine p-adic regression decision problem at the fixed prime p = 5.
+"""
+maintainer: "Greg Baker <gregb@ifost.org.au>"
+authors: ["Greg Baker"]
+homepage: "https://github.com/solresol/phd-thesis-coq"
+bug-reports: "https://github.com/solresol/phd-thesis-coq/issues"
+dev-repo: "git+https://github.com/solresol/phd-thesis-coq.git"
+build: [make "-j%{jobs}%"]
+install: [make "install"]
+remove: [make "uninstall"]
+depends: [
+  "coq" {>= "8.16" & < "8.17"}
+  "coq-library-undecidability" {= "1.0.1+8.16"}
+  "coq-library-complexity" {= "dev+8.16"}
+]

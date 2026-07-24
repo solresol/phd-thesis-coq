@@ -1,0 +1,5 @@
+-Q theories PhdThesisCoq
+
+-arg -w -arg -notation-overridden
+
+theories/Project.v

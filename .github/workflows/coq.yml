@@ -1,0 +1,40 @@
+name: Coq
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up OCaml and opam
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "4.14.2"
+
+      - name: Add the Coq package repository
+        run: opam repo add coq-released https://coq.inria.fr/opam/released
+
+      - name: Pin the complexity library
+        run: >-
+          opam pin add coq-library-complexity
+          'git+https://github.com/uds-psl/coq-library-complexity.git#14b5f413d2fb7adecde79c5451b483f9a1af59a8'
+          --no-action
+
+      - name: Install dependencies
+        run: opam install . --deps-only --yes
+
+      - name: Build
+        run: opam exec -- make -j2
+
+      - name: Reject unfinished proofs
+        run: >-
+          ! grep -R -n -E
+          '(^|[^[:alpha:]])(Admitted|admit)([^[:alpha:]]|$)|^[[:space:]]*Axiom[[:space:]]'
+          theories
