@@ -1,40 +1,116 @@
-name: Coq
+name: Coq proof verification
 
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: coq-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  trusted-main:
+    if: github.event_name != 'pull_request'
+    runs-on: [self-hosted, linux, x64, raksasa]
+    timeout-minutes: 240
+    env:
+      OPAMJOBS: "2"
 
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Reject unfinished proofs
+        run: |
+          if grep -R -n -E \
+            '(^|[^[:alpha:]])(Admitted|admit|Abort)([^[:alpha:]]|$)|^[[:space:]]*(Axiom|Parameter)[[:space:]]' \
+            theories; then
+            echo "::error::Found an unfinished proof or project-defined assumption"
+            exit 1
+          fi
 
       - name: Set up OCaml and opam
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: "4.14.2"
-
-      - name: Add the Coq package repository
-        run: opam repo add coq-released https://coq.inria.fr/opam/released
+          opam-repositories: |
+            coq-released: https://coq.inria.fr/opam/released
+            default: git+https://github.com/ocaml/opam-repository.git
 
       - name: Pin the complexity library
         run: >-
           opam pin add coq-library-complexity
           'git+https://github.com/uds-psl/coq-library-complexity.git#14b5f413d2fb7adecde79c5451b483f9a1af59a8'
-          --no-action
+          --no-action --yes
 
       - name: Install dependencies
         run: opam install . --deps-only --yes
 
-      - name: Build
+      - name: Build every proof
         run: opam exec -- make -j2
 
-      - name: Reject unfinished proofs
+      - name: Independently check the headline theorem
         run: >-
-          ! grep -R -n -E
-          '(^|[^[:alpha:]])(Admitted|admit)([^[:alpha:]]|$)|^[[:space:]]*Axiom[[:space:]]'
-          theories
+          opam exec -- coqchk
+          -Q theories PhdThesisCoq
+          -R _build/fpseries/theories Combi
+          PhdThesisCoq.Hardness
+
+  pull-request:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      OPAMJOBS: "2"
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Reject unfinished proofs
+        run: |
+          if grep -R -n -E \
+            '(^|[^[:alpha:]])(Admitted|admit|Abort)([^[:alpha:]]|$)|^[[:space:]]*(Axiom|Parameter)[[:space:]]' \
+            theories; then
+            echo "::error::Found an unfinished proof or project-defined assumption"
+            exit 1
+          fi
+
+      - name: Set up OCaml and opam
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "4.14.2"
+          opam-repositories: |
+            coq-released: https://coq.inria.fr/opam/released
+            default: git+https://github.com/ocaml/opam-repository.git
+
+      - name: Pin the complexity library
+        run: >-
+          opam pin add coq-library-complexity
+          'git+https://github.com/uds-psl/coq-library-complexity.git#14b5f413d2fb7adecde79c5451b483f9a1af59a8'
+          --no-action --yes
+
+      - name: Install dependencies
+        run: opam install . --deps-only --yes
+
+      - name: Build every proof
+        run: opam exec -- make -j2
+
+      - name: Independently check the headline theorem
+        run: >-
+          opam exec -- coqchk
+          -Q theories PhdThesisCoq
+          -R _build/fpseries/theories Combi
+          PhdThesisCoq.Hardness

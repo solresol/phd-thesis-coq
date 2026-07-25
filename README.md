@@ -1,5 +1,7 @@
 # Coq formalisation of fixed-prime regression hardness
 
+[![Coq proof verification](https://github.com/solresol/phd-thesis-coq/actions/workflows/coq.yml/badge.svg)](https://github.com/solresol/phd-thesis-coq/actions/workflows/coq.yml)
+
 This repository is the Coq formalisation companion for the NP-hardness part
 of Greg Baker's PhD thesis on p-adic and ultrametric regression. Its specific
 goal is a kernel-checked proof that the thesis's signed affine regression
@@ -49,6 +51,19 @@ composition with `CookLevin0`. See
 
 No result is counted as complete merely because its Lean analogue exists.
 Coq and Lean check separate proof terms.
+
+## Continuous verification
+
+GitHub Actions rebuilds every Coq source file, rejects unfinished proofs and
+project-defined assumptions, and runs `coqchk` independently on the headline
+hardness theorem. Pushes to `main` and manual runs use the repository-scoped
+`raksasa` runner. Pull requests use an isolated GitHub-hosted runner because
+this is a public repository and pull-request code must not execute on a
+self-hosted machine.
+
+The workflow checks out the pinned `fpseries` submodule and pins both the
+complexity library and the compatible MetaCoq release, so it exercises the
+same dependency boundary as the verified local development.
 
 ## Related repositories
 
